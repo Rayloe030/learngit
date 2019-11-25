@@ -1,0 +1,364 @@
+git 入门
+
+一、配置git bash
+
+    $git config --global user.name "your name"
+    $git config --global user.email "email@example.com"
+    注意git config命令的--global参数，用了这个参数，表示你这台机器上所有的Git仓库都会使用这个配置，当然也可以对某个仓库指定不同的用户名和Email地址。
+
+二、创建版本仓库
+
+    path = 选择仓库路径
+
+    $cd path
+    进入路径
+    $mkdir learngit 
+    建立learngit仓库
+    $pwd
+    显示当前目录
+
+    $git init
+    把目录变成git可以管理的仓库
+
+    当前目录下多了一个.git的目录，这个目录是Git来跟踪管理版本库的，没事千万不要手动修改这个目录里面的文件，不然改乱了，就把Git仓库给破坏了。
+
+
+三、把文件添加到版本库
+
+    $git add filename1
+    $git add filename2
+
+    $git commit -m "remarks"
+    将文件提交至仓库，remarks为提交的内容说明
+
+四、时光穿梭机
+
+4.1修改文件内容
+
+    $git status
+    查看仓库当前状态
+
+    $git diff
+    查看不同内容
+
+    $git add filename
+    确认修改后，添加文件
+
+    $git status
+    确认添加文件后，仓库的状态是否正常
+
+    $git commit
+    确认添加
+
+4.2版本退回
+
+    $git log
+    查看修改日志
+    $git log --pretty=oneline
+    把修改内容精简
+
+    $git reset --hard HEAD^
+    HEAD 为当前版本 
+    HEAD^ 为上一个版本
+    HEAD^^为上上个版本
+    HEAD~100 第100个前版本
+
+    $cat filename
+    查看该版本内容
+
+
+    $git rest --hard 部分commit id
+    通过commit id回到某个版本
+
+    $git reflog
+    记录每次命令
+
+4.3工作区和暂存区
+
+    $git add 将文件先存入暂存区 
+
+    $git commit 将文件存入仓库后暂存区文件清空
+
+4.4管理修改
+略
+
+4.5撤销修改
+
+    未提交至暂存区
+    $git checkout -- file
+    /*丢弃工作区的修改*/
+
+    提交至暂存区
+    $git reset HEAD file 
+    $git checkout -- file
+
+4.6删除文件
+
+    $rm filename
+    /*在工作区删除了文件*/
+
+    $git rm filename
+    /*在版本库中删除文件*/
+    $git commit 
+
+    $git checkout -- filename
+    /*从版本库还原至工作区*/
+
+
+五、远程仓库Github
+
+    创建SSH Key
+
+    $ssh-keygen -t rsa -C"email@example.com"
+
+    将生成的id_rsa.pub中的key赋值至github中添加ssh key
+
+    建立连接
+    $ git remote add origin git@github.com:Rayloe030/Base_model.git
+
+    删除连接
+    $git remote rm origin
+
+    如果github由文件未同步至工作站，则需要同步
+    $git pull --rebase origin master
+
+    将工作站文件同步至github
+    $git push -u origin master
+
+    SSH警告
+    第一次使用git的clone或push命令连接github时，会得到一个警告：
+
+    这是因为Git使用SSH连接，而SSH连接在第一次验证GitHub服务器的Key时，需要你确认GitHub的Key的指纹信     息是否真的来自GitHub的服务器，输入yes回车即可。
+    Git会输出一个警告，告诉你已经把GitHub的Key添加到本机的一个信任列表里了：
+
+
+    #####先创建远程库，然后从远程库克隆
+
+    $ git clone git@github.com:michaelliao/gitskills.git
+
+
+六、分支管理
+6.1创建与合并分支
+    
+    创建dev分支，切换到dev分支
+
+    $git checkout -b dev
+    /*checkout 加上-b 表示创建并切换相当于以下两条命令*/
+
+    $git branch dev
+    $git checkout dev
+
+    用git branch 命令查看当前分支
+
+    $git branch
+
+    切换回master分支
+    $ git checkout master
+
+    把dev分支合并到master分支
+    $git merge dev
+
+    合并完成后删除dev分支
+    $git branch -d dev
+
+
+    由switch命令切换分支
+    git swith -c dev
+    /*加了-c 表示创建并切换*/
+
+    git swith master
+
+6.2解决冲突
+查看分支合并图
+    git log --graph
+    
+6.3分支管理策略
+        
+    合并分支时，如果可能，git会用fast forward模式，但这种情况下，删除分支后，会丢掉分支信息。
+    如果要强制禁用fast forward模式，git就会在merge时生成一个新的commit，这样，从分支历史上就可以看出分支信息。（--no-ff方式     的git merge）
+    $git merge --no-ff -m"merge with no-ff"dev
+    
+6.4bug分支
+    软件开发中，bug就像家常便饭一样。有了bug就需要修复，在Git中，由于分支是如此的强大，所以，每个bug都可以通过一个新的临时分     支来修复，修复后，合并分支，然后将临时分支删除。
+    
+    git stash 功能,可以把当前工作现场“储藏”起来，等以后恢复现场后继续工作
+    $git stash
+    
+    确定在哪个分支上修复bug，假定需要在master分支上修复，在master创建临时分支：
+    $git checkout master
+    
+    创建分支issue-101 来修复bug
+    $git checkout -b issue-101
+
+    修复bug，修改文件
+    $git add readme.txt 
+    $git commit -m"fix bug 101"
+    
+    修复完成后，合并分支
+    
+    $git checkout master
+    
+    $git merge --no-ff -m"merged bug fix 101" issue-101
+    
+    回到dev分支继续工作
+    $git checkout dev
+    
+    $git status
+    
+    查看刚刚的工作现场
+    $git stash list
+    
+    恢复刚刚的stash中的工作内容:
+    一、git stash apply 恢复后stash内容并不删除，需要用 git stash drop来删除
+    二、git stash pop 恢复的同时把stash内容也删除
+    
+    $git stash pop
+    
+    $git stash list 
+    
+    多次stash，恢复的时候先用git stash list ,然后恢复指定的stash
+    $git stash apply stash@{0}
+    
+    同样的bug，要在dev上修复，我们只需要把4c805e2 fix bug 101这个提交所做的修改“复制”到dev分支。     注意：我们只想复制     4c805e2 fix bug 101这个提交所做的修改，并不是把整个master分支merge过来。
+    Git专门提供了一个cherry-pick命令，让我们能复制一个特定的提交到当前分支：
+    
+    $git branch 
+    
+    $git cherry-pick 4c805e2
+    
+6.4feature分支
+    添加一个新功能时，你肯定不希望因为一些实验性质的代码，把主分支搞乱了，所以，每添加一个新功能，     最好新建一个feature     分支，在上面开发，完成后，合并，最后，删除该feature分支。
+
+    创建feature分支
+    $git checkout -b feature-vulcan
+    
+    $git add vulcan.py
+    
+    $git commit -m"add feature vulcan"
+
+    切回dev 分支
+    $git checkout dev
+    
+    删除分支 /*未合并时，强制删除分支，用-D*/
+    $git branch -D feature-valcan
+    
+6.5多人协作
+    
+    当你从远程仓库克隆时，实际上Git自动把本地的master分支和远程的master分支对应起来了，并且，远程仓库的默认名称是origin。
+要查看远程库的信息，用git remote：
+    $git remote
+    
+    查看更详细的信息
+    $git remote -v
+    
+    推送分支
+    $git push origin master
+    $git push origin dev
+    
+    抓取分支
+    $git clone git@git.com:账号/项目.git
+    
+    当你的朋友从远程库克隆时，默认情况下，可能看到本地的master分支
+    $git branch
+    
+    当他需要在dev分支上开发，就必须创建远程origin的dev分支到本地
+    $git checkout -b dev origin/dev
+    
+    
+    将最新的提交从origin/dev抓下来，然后在本地合并
+    设置dev和origin/dev的连接
+    $git branch --set-upstream-to=origin/dev dev
+    $git pull 
+    $git commit -m"fix env conflict"
+    
+    $git push origin dev
+    
+6.6Rebase
+    
+    git rebase 可以把本地未push的分叉提交历史整理成直线
+    
+七、标签管理
+ 7.1创建标签
+    切换到要打标签的分支
+    $git branch 
+    $git checkout master
+    
+    打标签
+    $git tag v1.0
+    
+    $查看标签
+    $git tag
+    
+    比方说要对add merge这次提交打标签，它对应的commit id是f52c633，敲入命令：
+    $git tag v0.9 f52c633
+    
+    注意，标签不是按时间顺序列出，而是按字母排序的。可以用git show <tagname>查看标签信息：
+    
+    $git show v0.9
+    
+    还可以创建带有说明的标签，用-a指定标签名，-m指定说明文字：
+    
+    $ git tag -a v0.1 -m "version 0.1 released" 1094adb
+
+7.2操作标签
+    删除标签
+    $git tag -d v0.1
+    
+    如果要推送某个标签到远程，使用命令git push origin <tagname>：
+    $git push origin v1.0
+    
+    或者一次推送全部尚未推送到远程的本地标签
+    $git push origin --tags
+    
+    如果标签以及推送到远程，要删除远程标签，则需要先从本地删除
+    $git tag -d v0.9
+    然后从远程删除git push origin :refs/tags/<tagname>
+    $git push origin :refs/tags/v0.9
+
+
+八、使用Github
+    
+    $git clone git@github.com:michaelliao/bootstrap.git
+
+    我们在本地库上使用命令git remote add把它和码云的远程库关联：
+    $git remote add origin git@github.com:账号/项目.git
+    
+    查看远程库信息
+    $git remote -v
+    
+    删除已有的github远程库
+    $git remote rm origin
+    再关联码云的远程库
+    git remote add origin git@github.com:账号/项目.git
+    
+    因为git本身是分布式版本控制系统，可以同步到另外一个远程库，当然也可以同步到另外两个远程库。
+    使用多个远程库时，我们要注意，git给远程库起的默认名称是origin，如果有多个远程库，我们需要用不同的名称来标识不同的远程库。
+    仍然以learngit本地库为例，我们先删除已关联的名为origin的远程库：
+    
+    $git remote rm origin
+    
+    先关联github的远程库
+    git remote add github git@github.com:账号/项目.git
+    注意，远程库的名称叫github，不叫origin了。
+    接着，再关联码云的远程库：
+    $git remote add gitee git@gitee.com:账号/项目.git
+    
+    如果要推送到GitHub，使用命令：
+    $git push github master
+    如果要推送到码云，使用命令：
+    $git push gitee master
+   
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
